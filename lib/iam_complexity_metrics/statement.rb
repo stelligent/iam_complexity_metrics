@@ -53,8 +53,6 @@ class Statement
   end
 
   def action_service_name(action)
-    x =  evaluate(action)
-    puts "#{action} -> #{x}|"
     evaluate(action).split(':')[0]
   end
 

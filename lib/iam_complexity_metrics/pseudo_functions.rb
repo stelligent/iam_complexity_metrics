@@ -4,7 +4,6 @@ module PseudoFunctions
   # to align with actions
   #
   def evaluate(expression)
-    puts expression.class
     if expression.is_a? String
       expression
     elsif expression.is_a? Hash
@@ -14,6 +13,10 @@ module PseudoFunctions
         sub expression
       elsif expression.has_key?('Fn::If')
         evaluate expression['Fn::If'][1]
+      elsif expression.has_key?('Ref')
+       "${#{expression['Ref']}}"
+      elsif expression.has_key?('Fn::GetAtt')
+        "${#{expression['Fn::GetAtt'][0]}.#{expression['Fn::GetAtt'][1]}}"
       end
     else
       expression.to_s
@@ -33,10 +36,10 @@ module PseudoFunctions
   end
 
   def sub(expression)
-    if expression['Fn::Sub'][1].is_a? String
-      expression
-    elsif expression['Fn::Sub'][1].is_a? Array
-      expression['Fn::Sub'][1][0]
+    if expression['Fn::Sub'].is_a? String
+      expression['Fn::Sub']
+    elsif expression['Fn::Sub'].is_a? Array
+      expression['Fn::Sub'][0]
     else
       expression.to_s
     end

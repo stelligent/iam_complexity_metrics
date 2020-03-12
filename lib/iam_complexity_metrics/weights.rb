@@ -7,7 +7,7 @@ module Weights
       :NotAction => 1,
       :NotResource => 1,
 
-      :Resource_Extra_Service => 1,
+      :Resource_Extra_Service => 2,
       :Resource_Action_NotAligned => 1,
 
       :Condition => 2,
