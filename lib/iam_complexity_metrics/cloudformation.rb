@@ -44,6 +44,6 @@ class CloudFormation
   private
 
   def embedded_policy_id(role_id, policy)
-    role_id + '_' + policy['PolicyName']
+    role_id + '_' + policy['PolicyName'].to_s
   end
 end

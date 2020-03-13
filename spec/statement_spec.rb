@@ -70,7 +70,7 @@ describe Statement do
           ]
         }
         actual_metric = Statement.new.metric statement_hash
-        expected_metric = 9
+        expected_metric = 13
         expect(actual_metric).to eq(expected_metric)
       end
     end
@@ -95,9 +95,104 @@ describe Statement do
           ]
         }
         actual_metric = Statement.new.metric statement_hash
-        expected_metric = 7
+        expected_metric = 13
         expect(actual_metric).to eq(expected_metric)
       end
+    end
+  end
+
+  context 'wildcard action statement' do
+    it 'returns 1' do
+      statement_hash = {
+        'Effect' => 'Allow',
+        'Action' => '*',
+        'Resource' => 'arn:aws:fred:us-east-1:3333333333:dino'
+      }
+      actual_metric = Statement.new.metric statement_hash
+      expected_metric = 1
+      expect(actual_metric).to eq(expected_metric)
+    end
+  end
+
+  context 'wildcard resource statement' do
+    it 'returns 1' do
+      statement_hash = {
+        'Effect' => 'Allow',
+        'Action' => 'fred:YellAtDino',
+        'Resource' => '*'
+      }
+      actual_metric = Statement.new.metric statement_hash
+      expected_metric = 1
+      expect(actual_metric).to eq(expected_metric)
+    end
+  end
+
+  context 'admin statement' do
+    it 'returns 1' do
+      statement_hash = {
+        'Effect' => 'Allow',
+        'Action' => '*',
+        'Resource' => '*'
+      }
+      actual_metric = Statement.new.metric statement_hash
+      expected_metric = 1
+      expect(actual_metric).to eq(expected_metric)
+    end
+  end
+
+  context 'multiple service actions with wildcard resource' do
+    it 'returns 2' do
+      statement = <<END
+        {
+            "Effect": "Allow",
+            "Action": [
+                "route53resolver:*",
+                "ec2:DescribeSubnets",
+                "ec2:CreateNetworkInterface",
+                "ec2:DeleteNetworkInterface",
+                "ec2:ModifyNetworkInterfaceAttribute",
+                "ec2:DescribeNetworkInterfaces",
+                "ec2:CreateNetworkInterfacePermission",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeVpcs"
+            ],
+            "Resource": [
+                "*"
+            ]
+        }
+END
+      actual_metric = Statement.new.metric YAML.load(statement)
+      expected_metric = 3
+      expect(actual_metric).to eq(expected_metric)
+    end
+  end
+
+  context 'multiple service actions with wildcard resource' do
+    it 'returns 2' do
+      statement = <<END
+        {
+            "Effect": "Allow",
+            "Action": [
+                "route53resolver:*",
+                "ec2:DescribeSubnets",
+                "ec2:CreateNetworkInterface",
+                "ec2:DeleteNetworkInterface",
+                "ec2:ModifyNetworkInterfaceAttribute",
+                "ec2:DescribeNetworkInterfaces",
+                "ec2:CreateNetworkInterfacePermission",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeVpcs"
+            ],
+            "Resource": [
+                "arn:aws:ec2:us-east-1:3333333333:dino",
+                "arn:aws:route53resolver:us-east-1:3333333333:dino2",
+                "*"
+            ]
+        }
+END
+      actual_metric = Statement.new.metric YAML.load(statement)
+      expected_metric = 4
+      expect(actual_metric).to eq(expected_metric)
     end
   end
 end

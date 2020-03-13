@@ -14,8 +14,9 @@ class Statement
     aggregate += weights[:Allow] if statement_hash['Effect'] == 'Allow'
     aggregate += weights[:NotAction] if statement_hash.has_key?('NotAction')
     aggregate += weights[:NotResource] if statement_hash.has_key?('NotResource')
-    aggregate += extra_resource_count(statement_hash)
-    aggregate += misaligned_resource_action_count(statement_hash)
+    aggregate += extra_service_count(statement_hash) * weights[:Extra_Service]
+    aggregate += misaligned_resource_action_count(statement_hash) * weights[:Resource_Action_NotAligned]
+    aggregate += mixed_wildcard(statement_hash) * weights[:Mixed_Wildcard]
 
     if statement_hash.has_key? 'Condition'
       aggregate += Condition.new.metric(statement_hash)
@@ -25,38 +26,67 @@ class Statement
 
   private
 
+  def mixed_wildcard(statement_hash)
+    count = 0
+    count += 1 if action_service_names(statement_hash).include?('*') && action_service_names(statement_hash).size > 1
+    count += 1 if resource_service_names(statement_hash).include?('*') && resource_service_names(statement_hash).size > 1
+    count
+  end
+
   def misaligned_resource_action_count(statement_hash)
     if resource(statement_hash).is_a?(String)
+      return 0 if resource(statement_hash) == '*'
       resource_service_names = [resource_service_name(resource(statement_hash))]
     elsif resource(statement_hash).is_a?(Array)
       resource_service_names = resource(statement_hash).map { |resource_arn| resource_service_name(resource_arn) }
     end
 
     if action(statement_hash).is_a?(String)
+      return 0 if action(statement_hash) == '*'
       action_service_names = [action_service_name(action(statement_hash))]
     elsif action(statement_hash).is_a?(Array)
       action_service_names = action(statement_hash).map { |action| action_service_name(action) }
     end
 
-    (Set.new(resource_service_names) - Set.new(action_service_names)).size
+    (set_without_wildcard(resource_service_names) - set_without_wildcard(action_service_names)).size
   end
 
-  def extra_resource_count(statement_hash)
+  def set_without_wildcard(array)
+    Set.new(array).delete('*')
+  end
+
+  def extra_service_count(statement_hash)
+    service_names = Set.new(action_service_names(statement_hash) + resource_service_names(statement_hash)).delete('*')
+    [service_names.size - 1, 0].max
+  end
+
+  def action_service_names(statement_hash)
+    if action(statement_hash).is_a?(String)
+      [action_service_name(action(statement_hash))]
+    elsif action(statement_hash).is_a?(Array)
+      action(statement_hash).map { |resource_arn| action_service_name(resource_arn) }
+    else
+      []
+    end
+  end
+
+  def resource_service_names(statement_hash)
     if resource(statement_hash).is_a?(String)
-      0
+      [resource_service_name(resource(statement_hash))]
     elsif resource(statement_hash).is_a?(Array)
-      service_names = resource(statement_hash).map { |resource_arn| resource_service_name(resource_arn) }
-      Set.new(service_names).size - 1
-    else # Fn::Join or some other cfn-ism
-      0
+      resource(statement_hash).map { |resource_arn| resource_service_name(resource_arn) }
+    else
+      []
     end
   end
 
   def action_service_name(action)
+    return '*' if action == '*'
     evaluate(action).split(':')[0]
   end
 
   def resource_service_name(resource_arn)
+    return '*' if resource_arn == '*'
     evaluate(resource_arn).split(':')[2]
   end
 

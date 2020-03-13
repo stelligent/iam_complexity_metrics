@@ -9,6 +9,8 @@ module PseudoFunctions
     elsif expression.is_a? Hash
       if expression.has_key?('Fn::Join')
         join expression
+      elsif expression.has_key?('Fn::FindInMap')
+        find_in_map expression
       elsif expression.has_key?('Fn::Sub')
         sub expression
       elsif expression.has_key?('Fn::If')
@@ -21,6 +23,12 @@ module PseudoFunctions
     else
       expression.to_s
     end
+  end
+
+  ##
+  # room for improvement
+  def find_in_map(expression)
+    return ''
   end
 
   def join(expression)
@@ -50,4 +58,5 @@ module PseudoFunctions
   # { "Fn::Join" : [ "delimiter", [ comma-delimited list of values ] ] }
   # { "Fn::Sub" : [ String, { Var1Name: Var1Value, Var2Name: Var2Value } ] }
   # { "Fn::Sub" : String }
+  # { "Fn::FindInMap" : [ "MapName", "TopLevelKey", "SecondLevelKey"] }
 end
