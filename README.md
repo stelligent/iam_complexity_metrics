@@ -4,9 +4,9 @@
 2. Install bundler if need be
 3. bundle install
 
-## SPoDo CM for CloudFormation Templates
+## SPCM for CloudFormation Templates
 
-To compute the Stelligent Policy Document Complexity Metric (SPoDo CM) against a directory of CloudFormation templates:
+To compute the Stelligent Policy Complexity Metric (SPCM) against a directory of CloudFormation templates:
 
 ```rake cfn_iam_metrics[/var/tmp/aws_sample_templates]```
 
@@ -15,9 +15,9 @@ where /var/tmp/aws_sample_templates is a directory containing templates ending i
 The parser is very limited and best effort around ignoring pseudo-functions and dynamic values embedded inside policy 
 documents.
 
-## SPoDo for Live IAM Policy Documents
+## SPCM for Live IAM Policy Documents
 
-To compute the Stelligent Policy Document Complexity Metric (SPoDo CM) against all the AWS Managed Policy documents
+To compute the Stelligent Policy Complexity Metric (SPCM) against all the AWS Managed Policy documents
 in an account:
 
 ```rake live_iam_metrics[aws_profile]```
