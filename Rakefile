@@ -59,22 +59,22 @@ task :stats, :aws_profile do |_, args|
   stats[:total_complexity] = total_complexity
   puts stats
 
-  occurences_hash2 = {'SPoDoCM'=>occurences_hash.keys.map {|x| x.to_i }, '# Occurrences'=>occurences_hash.values}
+  occurences_hash2 = {'SPCM'=>occurences_hash.keys.map {|x| x.to_i }, '# Occurrences'=>occurences_hash.values}
   File.open('occurrences.json', 'w') { |file| file.write(JSON.pretty_generate(occurences_hash2)) }
 
-  occurences_hash3 = {'SPoDoCM'=>[], '# Occurrences'=>[]}
+  occurences_hash3 = {'SPCM'=>[], '# Occurrences'=>[]}
   occurences_hash.each do |k,v|
     if k.to_i < 25
-      occurences_hash3['SPoDoCM'] << k
+      occurences_hash3['SPCM'] << k
       occurences_hash3['# Occurrences'] << v
     end
   end
   File.open('occurrences2.json', 'w') { |file| file.write(JSON.pretty_generate(occurences_hash3)) }
 
-  occurences_hash4 = {'SPoDoCM'=>[], '# Occurrences'=>[]}
+  occurences_hash4 = {'SPCM'=>[], '# Occurrences'=>[]}
   occurences_hash.each do |k,v|
     if k.to_i < 50
-      occurences_hash4['SPoDoCM'] << k
+      occurences_hash4['SPCM'] << k
       occurences_hash4['# Occurrences'] << v
     end
   end
